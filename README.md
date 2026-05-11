@@ -1,6 +1,6 @@
 # Keymuncher
 
-<img src="hungrykeymuncher.png" alt="Hungry Keymuncher" width="400">
+<img src="hungrykeymuncher.png" alt="Hungry Keymuncher" width="400" align=center>
 
 Nastavení požírání kláves Okounem.
 
