@@ -20,7 +20,7 @@ Odkaz otevři v prohlížeči s Tampermonkey nebo Violentmonkey. Správce usersc
 
 ## Verze
 
-- Keymuncher: `0.3.0`
+- Keymuncher: `0.3.1`
 - Keymuncher Lite: `0.1.0`
 
 ## Keymuncher

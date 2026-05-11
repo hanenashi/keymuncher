@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Okoun Keymuncher
 // @namespace    https://www.okoun.cz/
-// @version      0.3.0
+// @version      0.3.1
 // @description  Tames Okoun bare-letter shortcuts so browser type-ahead-find can work again.
 // @author       Blaznik
 // @match        https://www.okoun.cz/*
@@ -13,6 +13,7 @@
 // @grant        GM_registerMenuCommand
 // @grant        GM_unregisterMenuCommand
 // @grant        GM_getResourceURL
+// @grant        GM.getResourceUrl
 // ==/UserScript==
 
 (function () {
@@ -20,7 +21,7 @@
 
     var STORAGE_KEY = 'keymuncher.settings.v1';
     var SEQUENCE_TIMEOUT_MS = 1200;
-    var VERSION = '0.3.0';
+    var VERSION = '0.3.1';
     var PROJECT_URL = 'https://github.com/hanenashi/keymuncher';
 
     var DEFAULT_SETTINGS = {
@@ -514,15 +515,23 @@
 
     function setPopupIcon() {
         var icon = popupNode.querySelector('[data-km="icon"]');
-        var url = '';
+        if (!icon) return;
+
         if (typeof GM_getResourceURL === 'function') {
-            url = GM_getResourceURL('keymuncherIcon');
+            icon.src = GM_getResourceURL('keymuncherIcon');
+            return;
         }
-        if (icon && url) {
-            icon.src = url;
-        } else if (icon) {
-            icon.remove();
+
+        if (typeof GM !== 'undefined' && GM && typeof GM.getResourceUrl === 'function') {
+            GM.getResourceUrl('keymuncherIcon').then(function (url) {
+                if (url) icon.src = url;
+            }).catch(function () {
+                icon.remove();
+            });
+            return;
         }
+
+        icon.remove();
     }
 
     function setVersionLink() {
