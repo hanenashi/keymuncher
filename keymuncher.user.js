@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Okoun Keymuncher
 // @namespace    https://www.okoun.cz/
-// @version      0.2.0
+// @version      0.3.0
 // @description  Tames Okoun bare-letter shortcuts so browser type-ahead-find can work again.
 // @author       Blaznik
 // @match        https://www.okoun.cz/*
@@ -20,7 +20,7 @@
 
     var STORAGE_KEY = 'keymuncher.settings.v1';
     var SEQUENCE_TIMEOUT_MS = 1200;
-    var VERSION = '0.2.0';
+    var VERSION = '0.3.0';
     var PROJECT_URL = 'https://github.com/hanenashi/keymuncher';
 
     var DEFAULT_SETTINGS = {
@@ -373,7 +373,7 @@
         ensurePopup();
         populatePopup();
         popupNode.hidden = false;
-        var firstInput = popupNode.querySelector('[data-km="enabled"]');
+        var firstInput = popupNode.querySelector('[data-km="keyEatingEnabled"]');
         if (firstInput) firstInput.focus();
     }
 
@@ -398,10 +398,6 @@
             '      <span><strong>Požírání kláves</strong><small>Zapnuto: Okoun si nechá svoje zkratky. Vypnuto: prohlížeč dostane `j`, `k`, `n`, `?` a `_`.</small></span>',
             '      <input type="checkbox" data-km="keyEatingEnabled">',
             '    </label>',
-            '    <label class="km-row km-switch">',
-            '      <span><strong>Remapované zkratky</strong><small>Volitelná místní navigace po příspěvcích.</small></span>',
-            '      <input type="checkbox" data-km="remapsEnabled">',
-            '    </label>',
             '    <section class="km-help" aria-label="Okouní zkratky">',
             '      <h2>Okouní zkratky</h2>',
             '      <dl>',
@@ -412,7 +408,8 @@
             '      </dl>',
             '    </section>',
             '    <fieldset class="km-fieldset">',
-            '      <legend>Zkratky</legend>',
+            '      <legend>Vlastní zkratky</legend>',
+            '      <label class="km-fieldset-switch"><span>Používat vlastní zkratky</span><input type="checkbox" data-km="remapsEnabled"></label>',
             '      <label><span>Další příspěvek</span><input type="text" data-km-remap="nextPost" spellcheck="false"></label>',
             '      <label><span>Předchozí příspěvek</span><input type="text" data-km-remap="prevPost" spellcheck="false"></label>',
             '      <label><span>Nejstarší nepřečtený</span><input type="text" data-km-remap="oldestUnread" spellcheck="false"></label>',
@@ -599,6 +596,7 @@
             '#keymuncher-settings .km-fieldset{margin:0;padding:10px;border:1px solid #d0c39c;border-radius:6px;background:#fffaf0}',
             '#keymuncher-settings .km-fieldset legend{font-weight:bold;padding:0 4px}',
             '#keymuncher-settings .km-fieldset label{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;margin-top:8px}',
+            '#keymuncher-settings .km-fieldset .km-fieldset-switch{grid-template-columns:minmax(0,1fr) 20px;margin-top:2px;font-weight:bold}',
             '#keymuncher-settings .km-status{min-height:18px;margin:0;color:#58410d;font-weight:bold}',
             '#keymuncher-settings .km-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}',
             '#keymuncher-settings .km-version{margin-right:auto;color:#6b5a34;text-decoration:none;font-size:11px;line-height:30px}',
