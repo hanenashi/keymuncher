@@ -31,8 +31,6 @@ Plná verze má nastavovací popup, ikonku a volitelné vlastní zkratky.
 - Přepínač `Požírání kláves` určuje, jestli Okoun smí dál chytat `j`, `k`, `n`, `?`, `_`.
 - Sekce `Vlastní zkratky` umí zapnout remapy pro další příspěvek, předchozí příspěvek a nejstarší nepřečtený.
 
-Výchozí testovací stav: požírání kláves je vypnuté, takže Keymuncher Okounu blokuje problematické klávesy. Před finálním releasem přepneme výchozí stav podle dohody na požírání zapnuté.
-
 ## Keymuncher Lite
 
 Lite verze nedělá nic viditelného. Nemá nastavení, ikonky ani remapy. Dokud je userscript zapnutý, tiše blokuje Okounu holé klávesy `j`, `k`, `n`, `?`, `_`.

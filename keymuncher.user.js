@@ -24,8 +24,7 @@
     var PROJECT_URL = 'https://github.com/hanenashi/keymuncher';
 
     var DEFAULT_SETTINGS = {
-        // Default-on while testing. Flip to false for final release if desired.
-        enabled: true,
+        enabled: false,
         mode: 'all',
         customBlockedKeys: ['j', 'k', 'n', '?', '_'],
         remapsEnabled: false,
@@ -395,7 +394,7 @@
             '  <button class="km-close" type="button" data-km="close" aria-label="Zavřít">x</button>',
             '  <form class="km-form" data-km="form">',
             '    <label class="km-row km-switch">',
-            '      <span><strong>Požírání kláves</strong><small>Zapnuto: Okoun si nechá svoje zkratky. Vypnuto: prohlížeč dostane `j`, `k`, `n`, `?` a `_`.</small></span>',
+            '      <span><strong>Požírání kláves</strong><small>Zapnuto: Okoun si nechá svoje zkratky.<br>Vypnuto: prohlížeč dostane `j`, `k`, `n`, `?` a `_`.</small></span>',
             '      <input type="checkbox" data-km="keyEatingEnabled">',
             '    </label>',
             '    <section class="km-help" aria-label="Okouní zkratky">',
