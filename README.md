@@ -1,6 +1,8 @@
 # Keymuncher
 
-<img src="hungrykeymuncher.png" alt="Hungry Keymuncher" width="400" align=center>
+<div style="display: flex; justify-content: center; align-items: center; height: 300px;">
+  <img src="hungrykeymuncher.png" alt="Hungry Keymuncher" width="400">
+</div>
 
 Nastavení požírání kláves Okounem.
 
