@@ -1,6 +1,6 @@
 # Keymuncher
 
-<div style="display: flex; justify-content: center; align-items: center;">
+<div align="center">
   <img src="hungrykeymuncher.png" alt="Hungry Keymuncher" width="400">
 </div>
 
