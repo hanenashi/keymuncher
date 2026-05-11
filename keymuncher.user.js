@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Okoun Keymuncher
 // @namespace    https://www.okoun.cz/
-// @version      0.1.0
+// @version      0.2.0
 // @description  Tames Okoun bare-letter shortcuts so browser type-ahead-find can work again.
 // @author       Blaznik
 // @match        https://www.okoun.cz/*
@@ -20,6 +20,8 @@
 
     var STORAGE_KEY = 'keymuncher.settings.v1';
     var SEQUENCE_TIMEOUT_MS = 1200;
+    var VERSION = '0.2.0';
+    var PROJECT_URL = 'https://github.com/hanenashi/keymuncher';
 
     var DEFAULT_SETTINGS = {
         // Default-on while testing. Flip to false for final release if desired.
@@ -60,12 +62,24 @@
             return;
         }
 
-        if (temporarilyDisabled || !settings.enabled || isTypingTarget(e.target)) {
+        if (temporarilyDisabled || isTypingTarget(e.target)) {
             clearPendingSequence();
             return;
         }
 
         if (settings.remapsEnabled && tryHandleRemap(e)) {
+            return;
+        }
+
+        if (!settings.enabled) {
+            clearPendingSequence();
+            return;
+        }
+
+        if (isBareEvent(e) && (e.key === '?' || e.key === '_')) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openSettingsPopup();
             return;
         }
 
@@ -190,10 +204,7 @@
     }
 
     function getBlockedKeys() {
-        if (settings.mode === 'custom') {
-            return normalizeKeyList(settings.customBlockedKeys);
-        }
-        return BLOCKED_BY_MODE[settings.mode] || BLOCKED_BY_MODE.all;
+        return BLOCKED_BY_MODE.all;
     }
 
     function isBareEvent(e) {
@@ -379,46 +390,40 @@
         popupNode.hidden = true;
         popupNode.innerHTML = [
             '<div class="km-backdrop" data-km="close"></div>',
-            '<section class="km-panel" role="dialog" aria-modal="true" aria-labelledby="km-title">',
+            '<section class="km-panel" role="dialog" aria-modal="true" aria-label="Nastavení Keymuncheru">',
             '  <img class="km-icon" data-km="icon" alt="">',
-            '  <button class="km-close" type="button" data-km="close" aria-label="Close">x</button>',
-            '  <header class="km-header">',
-            '    <h1 id="km-title">Keymuncher</h1>',
-            '    <p>Okoun key eating settings</p>',
-            '  </header>',
+            '  <button class="km-close" type="button" data-km="close" aria-label="Zavřít">x</button>',
             '  <form class="km-form" data-km="form">',
             '    <label class="km-row km-switch">',
-            '      <span><strong>Enable Keymuncher</strong><small>When off, Okoun receives all keys normally.</small></span>',
-            '      <input type="checkbox" data-km="enabled">',
-            '    </label>',
-            '    <label class="km-row">',
-            '      <span><strong>Blocking mode</strong><small>Which bare keys are hidden from Okoun.</small></span>',
-            '      <select data-km="mode">',
-            '        <option value="all">all Okoun keys</option>',
-            '        <option value="nk">n+k only</option>',
-            '        <option value="custom">custom</option>',
-            '      </select>',
-            '    </label>',
-            '    <label class="km-row">',
-            '      <span><strong>Custom blocked keys</strong><small>Used when mode is custom.</small></span>',
-            '      <input type="text" data-km="customBlockedKeys" spellcheck="false">',
+            '      <span><strong>Požírání kláves</strong><small>Zapnuto: Okoun si nechá svoje zkratky. Vypnuto: prohlížeč dostane `j`, `k`, `n`, `?` a `_`.</small></span>',
+            '      <input type="checkbox" data-km="keyEatingEnabled">',
             '    </label>',
             '    <label class="km-row km-switch">',
-            '      <span><strong>Enable remaps</strong><small>Runs local post navigation on configured shortcuts.</small></span>',
+            '      <span><strong>Remapované zkratky</strong><small>Volitelná místní navigace po příspěvcích.</small></span>',
             '      <input type="checkbox" data-km="remapsEnabled">',
             '    </label>',
+            '    <section class="km-help" aria-label="Okouní zkratky">',
+            '      <h2>Okouní zkratky</h2>',
+            '      <dl>',
+            '        <div><dt>j</dt><dd>další příspěvek</dd></div>',
+            '        <div><dt>k</dt><dd>předchozí příspěvek</dd></div>',
+            '        <div><dt>n n</dt><dd>nejstarší nepřečtený příspěvek</dd></div>',
+            '        <div><dt>? / _</dt><dd>tahle nápověda a nastavení Keymuncheru</dd></div>',
+            '      </dl>',
+            '    </section>',
             '    <fieldset class="km-fieldset">',
-            '      <legend>Remapped shortcuts</legend>',
-            '      <label><span>Next post</span><input type="text" data-km-remap="nextPost" spellcheck="false"></label>',
-            '      <label><span>Previous post</span><input type="text" data-km-remap="prevPost" spellcheck="false"></label>',
-            '      <label><span>Oldest unread</span><input type="text" data-km-remap="oldestUnread" spellcheck="false"></label>',
+            '      <legend>Zkratky</legend>',
+            '      <label><span>Další příspěvek</span><input type="text" data-km-remap="nextPost" spellcheck="false"></label>',
+            '      <label><span>Předchozí příspěvek</span><input type="text" data-km-remap="prevPost" spellcheck="false"></label>',
+            '      <label><span>Nejstarší nepřečtený</span><input type="text" data-km-remap="oldestUnread" spellcheck="false"></label>',
             '    </fieldset>',
             '    <p class="km-status" data-km="status" aria-live="polite"></p>',
             '    <div class="km-actions">',
-            '      <button type="button" data-km="tempDisable">Disable until reload</button>',
+            '      <a class="km-version" data-km="version" target="_blank" rel="noopener noreferrer"></a>',
+            '      <button type="button" data-km="tempDisable">Povolit požírání do obnovení</button>',
             '      <button type="button" data-km="reset">Reset</button>',
-            '      <button type="button" data-km="close">Cancel</button>',
-            '      <button type="submit" class="km-primary">Save</button>',
+            '      <button type="button" data-km="close">Zrušit</button>',
+            '      <button type="submit" class="km-primary">Uložit</button>',
             '    </div>',
             '  </form>',
             '</section>'
@@ -427,6 +432,7 @@
         document.body.appendChild(popupNode);
         bindPopupEvents();
         setPopupIcon();
+        setVersionLink();
     }
 
     function bindPopupEvents() {
@@ -439,7 +445,7 @@
             } else if (action === 'tempDisable') {
                 temporarilyDisabled = true;
                 clearPendingSequence();
-                setPopupStatus('Keymuncher is disabled until this page is reloaded.');
+                setPopupStatus('Požírání kláves je povolené do obnovení stránky.');
             }
         });
 
@@ -457,57 +463,50 @@
     }
 
     function populatePopup() {
-        setChecked('enabled', settings.enabled);
-        setValue('mode', settings.mode);
-        setValue('customBlockedKeys', normalizeKeyList(settings.customBlockedKeys).join(' '));
+        setChecked('keyEatingEnabled', !settings.enabled);
         setChecked('remapsEnabled', settings.remapsEnabled);
         setRemapValue('nextPost', settings.remaps.nextPost);
         setRemapValue('prevPost', settings.remaps.prevPost);
         setRemapValue('oldestUnread', settings.remaps.oldestUnread);
-        setPopupStatus(temporarilyDisabled ? 'Temporarily disabled until reload.' : '');
+        setPopupStatus(temporarilyDisabled ? 'Požírání kláves je povolené do obnovení stránky.' : '');
     }
 
     function saveFromPopup() {
         var next = clone(settings);
-        var customKeys = parseKeyList(getValue('customBlockedKeys'));
         var remaps = {
-            nextPost: normalizeRemapValue(getRemapValue('nextPost'), 'Next post'),
-            prevPost: normalizeRemapValue(getRemapValue('prevPost'), 'Previous post'),
-            oldestUnread: normalizeRemapValue(getRemapValue('oldestUnread'), 'Oldest unread')
+            nextPost: normalizeRemapValue(getRemapValue('nextPost'), 'Další příspěvek'),
+            prevPost: normalizeRemapValue(getRemapValue('prevPost'), 'Předchozí příspěvek'),
+            oldestUnread: normalizeRemapValue(getRemapValue('oldestUnread'), 'Nejstarší nepřečtený')
         };
 
-        if (!customKeys.length) {
-            setPopupStatus('Add at least one custom blocked key.');
-            return;
-        }
         if (!remaps.nextPost || !remaps.prevPost || !remaps.oldestUnread) {
             return;
         }
 
-        next.enabled = getChecked('enabled');
-        next.mode = getValue('mode');
-        next.customBlockedKeys = customKeys;
+        next.enabled = !getChecked('keyEatingEnabled');
+        next.mode = 'all';
+        next.customBlockedKeys = clone(DEFAULT_SETTINGS.customBlockedKeys);
         next.remapsEnabled = getChecked('remapsEnabled');
         next.remaps = remaps;
 
         settings = mergeSettings(DEFAULT_SETTINGS, next);
         saveSettings();
-        setPopupStatus('Saved.');
+        setPopupStatus('Uloženo.');
     }
 
     function resetFromPopup() {
-        if (!confirm('Reset Keymuncher settings to defaults?')) return;
+        if (!confirm('Vrátit nastavení Keymuncheru na výchozí hodnoty?')) return;
         settings = clone(DEFAULT_SETTINGS);
         temporarilyDisabled = false;
         saveSettings();
         populatePopup();
-        setPopupStatus('Reset to defaults.');
+        setPopupStatus('Výchozí nastavení obnoveno.');
     }
 
     function normalizeRemapValue(value, label) {
         var sequence = parseSequence(value);
         if (!sequence.length) {
-            setPopupStatus(label + ' shortcut is empty or invalid.');
+            setPopupStatus(label + ': zkratka je prázdná nebo neplatná.');
             return '';
         }
         return sequence.join(' ');
@@ -528,6 +527,13 @@
         } else if (icon) {
             icon.remove();
         }
+    }
+
+    function setVersionLink() {
+        var link = popupNode.querySelector('[data-km="version"]');
+        if (!link) return;
+        link.href = PROJECT_URL;
+        link.textContent = 'Keymuncher v' + VERSION;
     }
 
     function setPopupStatus(text) {
@@ -574,28 +580,34 @@
             '#keymuncher-settings[hidden]{display:none!important}',
             '#keymuncher-settings{position:fixed;inset:0;z-index:2147483647;font:13px/1.35 Arial,sans-serif;color:#221f1b}',
             '#keymuncher-settings .km-backdrop{position:absolute;inset:0;background:rgba(32,28,21,.42)}',
-            '#keymuncher-settings .km-panel{position:absolute;left:50%;top:50%;box-sizing:border-box;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 32px);overflow:auto;transform:translate(-50%,-50%);padding:86px 18px 16px;border:3px solid #5f4b24;border-radius:8px;background:#f6f1df;box-shadow:0 18px 54px rgba(0,0,0,.42)}',
-            '#keymuncher-settings .km-icon{position:absolute;left:50%;top:0;width:min(300px,72vw);height:auto;transform:translate(-50%,-48%);pointer-events:none;filter:drop-shadow(0 7px 5px rgba(0,0,0,.28))}',
-            '#keymuncher-settings .km-close{position:absolute;right:8px;top:8px;width:28px;height:28px;border:1px solid #8c7a55;border-radius:4px;background:#fff8dd;color:#332b1f;font-weight:bold;cursor:pointer}',
-            '#keymuncher-settings .km-header{margin:0 0 12px;text-align:center}',
-            '#keymuncher-settings h1{margin:0;font-size:26px;letter-spacing:0;color:#372914}',
+            '#keymuncher-settings .km-panel{position:absolute;left:50%;top:54%;box-sizing:border-box;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 128px);overflow:visible;transform:translate(-50%,-50%);padding:98px 18px 16px;border:3px solid #5f4b24;border-radius:8px;background:#f6f1df;box-shadow:0 18px 54px rgba(0,0,0,.42)}',
+            '#keymuncher-settings .km-icon{position:absolute;left:50%;top:0;width:min(340px,74vw);height:auto;transform:translate(-48%,-56%);pointer-events:none;filter:drop-shadow(0 7px 5px rgba(0,0,0,.28));z-index:1}',
+            '#keymuncher-settings .km-close{position:absolute;right:8px;top:8px;width:28px;height:28px;border:1px solid #8c7a55;border-radius:4px;background:#fff8dd;color:#332b1f;font-weight:bold;cursor:pointer;z-index:2}',
             '#keymuncher-settings p{margin:4px 0 0}',
-            '#keymuncher-settings .km-form{display:grid;gap:10px}',
+            '#keymuncher-settings .km-form{display:grid;gap:10px;max-height:calc(100vh - 250px);overflow:auto;padding-right:2px}',
             '#keymuncher-settings .km-row{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:14px;align-items:center;padding:9px 10px;border:1px solid #d0c39c;border-radius:6px;background:#fffaf0}',
             '#keymuncher-settings .km-row strong{display:block;font-size:13px}',
             '#keymuncher-settings .km-row small{display:block;margin-top:2px;color:#695d48}',
             '#keymuncher-settings input[type=text],#keymuncher-settings select{box-sizing:border-box;width:100%;min-height:30px;border:1px solid #9f8f69;border-radius:4px;background:white;color:#221f1b;padding:4px 7px;font:13px Arial,sans-serif}',
             '#keymuncher-settings input[type=checkbox]{width:20px;height:20px;justify-self:end}',
+            '#keymuncher-settings .km-help{padding:10px;border:1px solid #d0c39c;border-radius:6px;background:#fffaf0}',
+            '#keymuncher-settings .km-help h2{margin:0 0 8px;font-size:13px;letter-spacing:0}',
+            '#keymuncher-settings .km-help dl{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:0}',
+            '#keymuncher-settings .km-help div{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px;align-items:start}',
+            '#keymuncher-settings .km-help dt{font-family:Consolas,monospace;font-weight:bold;color:#372914}',
+            '#keymuncher-settings .km-help dd{margin:0;color:#443828}',
             '#keymuncher-settings .km-fieldset{margin:0;padding:10px;border:1px solid #d0c39c;border-radius:6px;background:#fffaf0}',
             '#keymuncher-settings .km-fieldset legend{font-weight:bold;padding:0 4px}',
             '#keymuncher-settings .km-fieldset label{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;margin-top:8px}',
             '#keymuncher-settings .km-status{min-height:18px;margin:0;color:#58410d;font-weight:bold}',
-            '#keymuncher-settings .km-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}',
+            '#keymuncher-settings .km-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}',
+            '#keymuncher-settings .km-version{margin-right:auto;color:#6b5a34;text-decoration:none;font-size:11px;line-height:30px}',
+            '#keymuncher-settings .km-version:hover{text-decoration:underline}',
             '#keymuncher-settings button{min-height:30px;border:1px solid #8c7a55;border-radius:4px;background:#fff8dd;color:#2f2618;cursor:pointer;padding:4px 10px;font:13px Arial,sans-serif}',
             '#keymuncher-settings button:hover{background:#fff1b7}',
             '#keymuncher-settings .km-primary{background:#355f34;border-color:#294f28;color:white}',
             '#keymuncher-settings .km-primary:hover{background:#2c522b}',
-            '@media(max-width:560px){#keymuncher-settings .km-panel{padding-left:12px;padding-right:12px}#keymuncher-settings .km-row,#keymuncher-settings .km-fieldset label{grid-template-columns:1fr}#keymuncher-settings input[type=checkbox]{justify-self:start}}'
+            '@media(max-width:560px){#keymuncher-settings .km-panel{top:55%;padding-left:12px;padding-right:12px}#keymuncher-settings .km-row,#keymuncher-settings .km-fieldset label{grid-template-columns:1fr}#keymuncher-settings .km-help dl{grid-template-columns:1fr}#keymuncher-settings input[type=checkbox]{justify-self:start}#keymuncher-settings .km-version{flex-basis:100%;line-height:18px}}'
         ].join('');
 
         (document.head || document.documentElement).appendChild(style);

@@ -1,75 +1,74 @@
-# keymuncher
+# Keymuncher
 
-Nastaveni pozirani klaves Okounem.
+Nastavení požírání kláves Okounem.
 
 ## Instalace
 
 [Nainstalovat Keymuncher](https://raw.githubusercontent.com/hanenashi/keymuncher/main/keymuncher.user.js)
 
-Odkaz otevri v prohlizeci s Tampermonkey nebo Violentmonkey. Spravce userscriptu by mel nabidnout instalaci nebo aktualizaci.
+Odkaz otevři v prohlížeči s Tampermonkey nebo Violentmonkey. Správce userscriptů by měl nabídnout instalaci nebo aktualizaci.
 
-## Co to resi
+## Co To Řeší
 
-Okoun ma globalni klavesove zkratky:
+Okoun má globální klávesové zkratky:
 
-- `j` dalsi prispevek
-- `k` predchozi prispevek
-- `n n` nejstarsi neprecteny prispevek
-- `?` / `_` napoveda ke zkratkam
+- `j` další příspěvek
+- `k` předchozí příspěvek
+- `n n` nejstarší nepřečtený příspěvek
+- `?` / `_` nápověda ke zkratkám
 
-Na Firefoxu to rozbije type-ahead-find, tedy hledani odkazu nebo textu prostym psanim na strance. Browserova funkce neni textove pole, takze Okoun zachyti hole pismeno driv, zavola `preventDefault()` a Firefox uz se ke klavese nedostane.
+Na Firefoxu to rozbije type-ahead-find, tedy hledání odkazu nebo textu prostým psaním na stránce. Browserová funkce není textové pole, takže Okoun zachytí holé písmeno dřív, zavolá `preventDefault()` a Firefox už se ke klávese nedostane.
 
-Keymuncher prida vlastni capture-phase `keydown` listener, ktery vybrane hole klavesy zastavi jeste pred okounim handlerem. Pri beznem blokovani nepouziva `preventDefault()`, takze prohlizec muze klavesu dal zpracovat.
+Keymuncher přidá vlastní capture-phase `keydown` listener, který vybrané holé klávesy zastaví ještě před okouním handlerem. Při běžném blokování nepoužívá `preventDefault()`, takže prohlížeč může klávesu dál zpracovat.
 
-## Vychozi testovaci stav
+## Výchozí Testovací Stav
 
-- Keymuncher je zapnuty.
-- Blokuje Okounu hole klavesy `j`, `k`, `n`, `?`, `_`.
-- Nastaveni je dostupne z jedne polozky v menu userscript manageru: `Keymuncher settings`.
-- Nastavovaci popup pouziva `keymuncher.png` jako ikonku.
-- Remapy jsou pripravene, ale vypnute.
+- Požírání kláves je vypnuté, takže Keymuncher Okounu blokuje holé klávesy `j`, `k`, `n`, `?`, `_`.
+- Nastavení je dostupné z jedné položky v menu userscript manageru: `Keymuncher settings`.
+- Při vypnutém požírání otevře `?` nebo `_` okno Keymuncheru místo původní okouní nápovědy.
+- Nastavovací popup používá `keymuncher.png` jako ikonku.
+- Remapy jsou připravené, ale vypnuté.
 
-Pred finalnim releasem prepneme vychozi stav podle dohody na vypnuto.
+Před finálním releasem přepneme výchozí stav podle dohody na požírání zapnuté, tedy bez zásahu do Okouna.
 
-## Nastaveni
+## Nastavení
 
-Popup umi:
+Popup umí:
 
-- zapnout nebo vypnout Keymuncher
-- vybrat rezim blokovani: vsechny okouni klavesy, jen `n+k`, nebo custom
-- nastavit vlastni seznam blokovanych klaves
+- zapnout nebo vypnout požírání kláves
+- zobrazit okouní zkratky `j`, `k`, `n n`, `?` / `_`
 - zapnout remapy
-- nastavit remapy pro dalsi prispevek, predchozi prispevek a nejstarsi neprecteny
-- docasne vypnout Keymuncher do reloadu
-- vratit vychozi nastaveni
+- nastavit remapy pro další příspěvek, předchozí příspěvek a nejstarší nepřečtený
+- dočasně povolit požírání kláves do reloadu
+- vrátit výchozí nastavení
 
-Kdyz je Keymuncher vypnuty, necha Okoun klavesy zpracovat normalne. Nastaveni zustava pristupne pres menu userscript manageru.
+Když je požírání kláves zapnuté, Keymuncher nechá Okouna zpracovat klávesy normálně. Nastavení zůstává přístupné přes menu userscript manageru.
 
-## Technicke poznamky
+## Technické Poznámky
 
-Userscript bezi na:
+Userscript běží na:
 
 - `https://www.okoun.cz/*`
 - `http://www.okoun.cz/*`
 
-Pouziva:
+Používá:
 
-- `@run-at document-start`, aby byl listener zaregistrovany pred okounim skriptem
-- `GM_getValue` / `GM_setValue` pro ulozene nastaveni
-- `GM_registerMenuCommand` pro jednu polozku nastaveni
+- `@run-at document-start`, aby byl listener zaregistrovaný před okouním skriptem
+- `GM_getValue` / `GM_setValue` pro uložené nastavení
+- `GM_registerMenuCommand` pro jednu položku nastavení
 - `GM_getResourceURL` a `@resource keymuncherIcon` pro popup ikonku
 
-Remapy nevolaji okouni interni funkce, protoze jsou uzavrene uvnitr IIFE v `main.js`. Misto toho Keymuncher lokalne najde `.listing .item:not(.ignored)` a posouva stranku na prislusny prispevek.
+Remapy nevolají okouní interní funkce, protože jsou uzavřené uvnitř IIFE v `main.js`. Místo toho Keymuncher lokálně najde `.listing .item:not(.ignored)` a posouvá stránku na příslušný příspěvek.
 
-## Vyvoj
+## Vývoj
 
-Rychla syntax kontrola:
+Rychlá syntax kontrola:
 
 ```powershell
 node --check .\keymuncher.user.js
 ```
 
-Aktualni ikonka:
+Aktuální ikonka:
 
 ```text
 keymuncher.png
