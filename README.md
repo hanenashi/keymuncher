@@ -25,7 +25,7 @@ Keymuncher přidá vlastní capture-phase `keydown` listener, který vybrané ho
 
 - Požírání kláves je vypnuté, takže Keymuncher Okounu blokuje holé klávesy `j`, `k`, `n`, `?`, `_`.
 - Nastavení je dostupné z jedné položky v menu userscript manageru: `Keymuncher settings`.
-- Při vypnutém požírání otevře `?` nebo `_` okno Keymuncheru místo původní okouní nápovědy.
+- `?` nebo `_` otevře okno Keymuncheru místo původní okouní nápovědy.
 - Nastavovací popup používá `keymuncher.png` jako ikonku.
 - Remapy jsou připravené, ale vypnuté.
 

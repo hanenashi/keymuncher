@@ -71,15 +71,15 @@
             return;
         }
 
-        if (!settings.enabled) {
-            clearPendingSequence();
-            return;
-        }
-
         if (isBareEvent(e) && (e.key === '?' || e.key === '_')) {
             e.preventDefault();
             e.stopImmediatePropagation();
             openSettingsPopup();
+            return;
+        }
+
+        if (!settings.enabled) {
+            clearPendingSequence();
             return;
         }
 
